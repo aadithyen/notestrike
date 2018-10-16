@@ -18,7 +18,8 @@ class NoteStrike extends StatelessWidget {
       home: Body(),
       theme: ThemeData(
         brightness: Brightness.dark,
-        primaryColor: Colors.blueGrey[700],
+        primaryColor: Color.fromRGBO(18, 20, 20, 1.0),
+        accentColor: Color.fromRGBO(252, 163, 17, 1.0)
       )
     );
   }
