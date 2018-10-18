@@ -53,7 +53,7 @@ class BodyState extends State<Body> {
       ),
       body: new Container(
         child: ListView.builder(
-          padding: new EdgeInsets.all(16.0),
+          padding: new EdgeInsets.all(10.0),
           itemCount: 5,
           itemBuilder: (BuildContext context, int index) {
             return new Container(

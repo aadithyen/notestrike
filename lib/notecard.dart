@@ -28,7 +28,7 @@ class NoteCardState extends State<NoteCard> {
                 ),
                 new Container(
                   child: new Text("Note Body",),
-                  padding: EdgeInsets.all(10.0),
+                  padding: EdgeInsets.symmetric(horizontal : 20.0)
                 ),
                 new ButtonTheme.bar(
                   child: new ButtonBar(
