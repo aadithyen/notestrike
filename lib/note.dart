@@ -1,29 +1,52 @@
 import 'package:flutter/material.dart';
 import 'notecard.dart';
 import 'dart:convert';
+import 'noteclass.dart';
 import 'dart:async';
+import 'package:share/share.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+GlobalKey<ScaffoldState> scaffoldState = new GlobalKey<ScaffoldState>();
 
 class NotePage extends StatefulWidget {
-  var _refreshNotes;
-  NotePage(this._refreshNotes);
+  Note _note;
+  NotePage(this._note);
   @override
     State<StatefulWidget> createState() {
-      return new NotePageState(this._refreshNotes);
+      return new NotePageState(this._note);
     }
 }
 enum Categories {
   blue,red,green,orange,grey
 }
 
+
 class NotePageState extends State<NotePage> {
-  var _category=0, _title, _body, _created, _lastUpdate,_refreshNotes;
-  NotePageState(this._refreshNotes);
+  Note _note;
+  TextEditingController _titleController, _bodyController;
+  final FocusNode bodyFocus = FocusNode();
+
+  NotePageState(this._note) {
+    _titleController = new TextEditingController(
+      text: _note.title
+    );
+    _bodyController = new TextEditingController(
+      text: _note.body
+    );    
+  }
+
+  @override
+    void dispose() {
+      bodyFocus.dispose();
+      super.dispose();
+    }
+
   @override
     Widget build(BuildContext context) {
       return new Scaffold(
+        key: scaffoldState,
         appBar: AppBar(
+          backgroundColor: Colors.grey[850],
           elevation: 0.0,
           leading: IconButton(
             icon: Icon(Icons.arrow_back),
@@ -34,11 +57,13 @@ class NotePageState extends State<NotePage> {
           actions: <Widget>[
             IconButton(
               icon: Icon(Icons.share),
-              onPressed: () {}
+              onPressed: () {
+                Share.share(_titleController.text + " : " + _bodyController.text );
+              }
             ),
             PopupMenuButton<Categories>(
               icon: Icon(Icons.bookmark,
-                color: Color(returnColor(_category))),
+                color: Color(returnColor(_note.category))),
             itemBuilder: (BuildContext context) => <PopupMenuItem<Categories>>[
               const PopupMenuItem<Categories>(
                 value: Categories.blue,
@@ -93,7 +118,7 @@ class NotePageState extends State<NotePage> {
             ],
             onSelected: (Categories action) {
               setState(() {
-                _category = action.index;
+                _note.category = action.index;
                 
               });
             }
@@ -103,78 +128,93 @@ class NotePageState extends State<NotePage> {
         floatingActionButton: FloatingActionButton.extended(
           icon: Icon(Icons.save),
           label: Text("Save"),
-          backgroundColor: Color(returnColor(_category)),
+          foregroundColor: Colors.white,
+          backgroundColor: Color(returnColor(_note.category)),
           onPressed: () async {
+            if(_titleController.text == "") {
+              scaffoldState.currentState.showSnackBar(
+                new SnackBar(
+                  content: Text("Title can't be empty"),
+                )
+              );
+              return;
+            }
+            final created = (_note.created == "") ? DateTime.now().toString() : _note.created;
             var note = json.encode({
-              "category": _category,
-              "title": _title,
-              "body": _body,
-              "created": DateTime.now().toString(),
-              "lastUpdate": _lastUpdate.toString()
+              "category": _note.category,
+              "title": _titleController.text,
+              "body": _bodyController.text,
+              "created": created,
+              "lastUpdate": DateTime.now().toString()
             });
+            _note.created = created;
             final prefs = await SharedPreferences.getInstance();
-            prefs.setString(DateTime.now().toString(), note);
-            Timer timer = new Timer(new Duration(seconds: 1), this._refreshNotes);
+            prefs.setString(created, note);
+            scaffoldState.currentState.showSnackBar(
+              new SnackBar(
+                content: Text("Saved")
+              )
+            );
+            
           }
         ),
-        body: Container(
-          color: Colors.white,
-          child: ListView(
-            children: <Widget>[
-              new Container(
-                padding: EdgeInsets.only(
-                  bottom: 0.0,
-                  top: 15.0,
-                  left: 15.0,
-                  right: 15.0,
-                ),
-                child: new TextField(
-                  decoration: InputDecoration(
-                    hintText: "Title",
-                    border: InputBorder.none
+        body:
+        Builder( builder: (context) => 
+          Container(
+            color: Colors.grey[850],
+            child: ListView(
+              children: <Widget>[
+                new Container(
+                  padding: EdgeInsets.only(
+                    bottom: 0.0,
+                    top: 15.0,
+                    left: 15.0,
+                    right: 15.0,
                   ),
-                  onChanged: (str) {
-                    setState(() {
-                      _title= str;
-                    });
+                  child: new TextFormField(
+                    controller: _titleController,
+                    decoration: InputDecoration(
+                      hintText: "Title",
+                      border: InputBorder.none
+                    ),
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 35.0,        
+                    ),
+                    textCapitalization: TextCapitalization.sentences,
+                  
+                  ),
+                  decoration: BoxDecoration(
+                    border: Border(bottom: BorderSide(
+                      width: 1.0,
+                      color: Color(0xFFCCCCCC)
+                    ))
+                  ),
+                ),
+                new InkWell(
+                  onTap: () {
+                    FocusScope.of(context).requestFocus(bodyFocus);
                   },
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 35.0,
-                    color: Colors.black,
-                    
-                  ),
-                  textCapitalization: TextCapitalization.sentences,
-                
-                ),
-                decoration: BoxDecoration(
-                  border: Border(bottom: BorderSide(
-                    width: 1.0,
-                    color: Color(0xFFCCCCCC)
-                  ))
-                ),
-              ),
-              new Container(
-                height:50.0,
-                padding: EdgeInsets.all(15.0),
-                child: new TextField(
-                  onChanged: (str) {
-                    setState(() {
-                      _body = str;
-                    });
-                  },
-                  maxLines: null,
-                  textCapitalization: TextCapitalization.sentences, 
-                  keyboardType: TextInputType.multiline,
-                  decoration: InputDecoration(
-                    hintText: "Enter your note here...",
-                    border: InputBorder.none
-                  ),
-                ),
-              )
-            ],
-          )
-        ),
+                  child: Container(
+                    height: 500.0,
+                    padding: EdgeInsets.all(15.0),
+                    child: new TextFormField(
+                      controller: _bodyController,
+                      focusNode: bodyFocus,
+                      maxLines: null,
+                      textCapitalization: TextCapitalization.sentences, 
+                      keyboardType: TextInputType.multiline,
+                      decoration: InputDecoration(
+                        hintText: "Enter your note here...",
+                        border: InputBorder.none
+                      ),
+                    ),
+                  )
+                )
+              ],
+            )
+          ),
+        )
       );
     } 
 }
