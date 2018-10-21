@@ -1,14 +1,16 @@
 import 'package:flutter/material.dart';
 import 'noteclass.dart';
+import 'note.dart';
+import 'main.dart';
 
-class NoteCard extends StatefulWidget {
-  final _title, _body, _category, _created;
-  NoteCard(this._title, this._body, this._category, this._created);
-  @override
-    State<StatefulWidget> createState() {
-      return new NoteCardState(this._title, this._body, this._category, this._created);
-    }
-}
+// class NoteCard extends StatefulWidget {
+//   final _title, _body, _category, _created, _refreshCallBack;
+//   NoteCard(this._title, this._body, this._category, this._created, this._refreshCallBack);
+//   @override
+//     State<StatefulWidget> createState() {
+//       return new NoteCardState(this._title, this._body, this._category, this._created);
+//     }
+// }
 
 int returnColor(int category) {
   switch (category) {
@@ -32,14 +34,17 @@ int returnColor(int category) {
   }
 }
 
-class NoteCardState extends State<NoteCard> {
-  var _title, _body, _category, _created;
-  NoteCardState(this._title, this._body, this._category, this._created);
-
+class NoteCard extends StatelessWidget{
+  final Note _note;
+  final _deleteCallBack, _editCallBack;
+  NoteCard(this._note, this._deleteCallBack, this._editCallBack);
   @override
     Widget build(BuildContext context) {
       return new Card(
         child: new InkWell(
+          onTap : () {
+            this._editCallBack(_note);
+          },
           child: new Container(
             child: new Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -47,23 +52,47 @@ class NoteCardState extends State<NoteCard> {
                 new ListTile(
                   leading: new Icon(
                     Icons.bookmark,
-                    color: Color(returnColor(_category)),
+                    color: Color(returnColor(_note.category)),
                   ),
-                  title: new Text(_title,
+                  title: new Text(_note.title,
                     style: new TextStyle(
                       fontWeight : FontWeight.bold
                     ),)
                 ),
                 new Container(
-                  child: new Text(_body,),
+                  child: new Text(_note.body,),
                   padding: EdgeInsets.symmetric(horizontal : 20.0)
                 ),
                 new ButtonTheme.bar(
                   child: new ButtonBar(
                     children: <Widget>[
                       new IconButton(
-                        onPressed: () {
-
+                        onPressed: () async {
+                          return showDialog<Null>(
+                            context: context,
+                            barrierDismissible: false,
+                            builder: (BuildContext context) {
+                              return AlertDialog(
+                                title: Text('Are you sure you want to delete?'),
+                                actions: <Widget>[
+                                  FlatButton(
+                                    child: Text('Cancel'),
+                                    onPressed: () {
+                                      Navigator.of(context).pop();
+                                    },
+                                  ),
+                                  FlatButton(
+                                    child: Text('Delete'),
+                                    textColor: Colors.redAccent,
+                                    onPressed: () {
+                                      _deleteCallBack(_note.created);
+                                      Navigator.of(context).pop();
+                                    },
+                                  ),
+                                ],
+                              );
+                            },
+                          );
                         },
                         icon: Icon(
                           Icons.delete,
@@ -75,9 +104,6 @@ class NoteCardState extends State<NoteCard> {
               ],
             ),
           ),
-          onTap: () {
-            print("Pressed on Card");
-          },
         )
       );
     }

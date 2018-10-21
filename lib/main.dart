@@ -4,6 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'note.dart';
 import 'noteclass.dart';
 import 'dart:convert';
+import 'package:splashscreen/splashscreen.dart';
 
 void main() => runApp(NoteStrike());
 
@@ -13,6 +14,8 @@ void main() => runApp(NoteStrike());
 //       return new noteStrikeState();
 //     }
 // }
+
+
 
 class NoteStrike extends StatelessWidget {
   @override
@@ -31,14 +34,13 @@ class NoteStrike extends StatelessWidget {
       home: Body(),
       theme: ThemeData(
         fontFamily: 'Roboto',
-        brightness: Brightness.light,
-        primaryColor: Color.fromRGBO(255, 255, 255, 1.0),
-        //accentColor: Color.fromRGBO(252, 163, 17, 1.0)
+        brightness: Brightness.dark,
+        primaryColor: Colors.grey[800],
+        accentColor: Colors.blue
       )
     );
   }
 }
-
 class Body extends StatefulWidget {
   @override
   State<StatefulWidget> createState() {
@@ -49,26 +51,45 @@ class Body extends StatefulWidget {
 class BodyState extends State<Body> {
   Set _noteKeys = Set();
   var notes = <Map>[];
+  SharedPreferences prefs;
+
+  Future<Null> gotoNote(Note note) async {
+    await Navigator.push(
+      context,
+      new MaterialPageRoute(builder: (context) => new NotePage(note)),
+    );
+    getSharedPrefs();
+  }
+
   Future<Null> getSharedPrefs() async {
     print("Refreshing notes...");
-    SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs = await SharedPreferences.getInstance();
     setState(() {
-          _noteKeys = prefs.getKeys();
+      _noteKeys = prefs.getKeys();
     });
+    var notesArr = <Map>[];
     _noteKeys.forEach((key) {
       var noteItemJson = prefs.getString(key);
       Map noteItem = json.decode(noteItemJson);
-      setState(() {
-        notes.add(noteItem);
-      }); 
+      notesArr.add(noteItem);
     });
+    setState(() {
+      notes = notesArr;
+    }); 
+  }
+
+  dynamic deleteNote(String key) async {
+    prefs = await SharedPreferences.getInstance();
+    prefs.remove(key);
+    getSharedPrefs();
   }
 
   @override
   void initState() {
-      super.initState();
-      getSharedPrefs();
-    }
+    super.initState();
+    getSharedPrefs();
+  }
+
   @override
   Widget build(BuildContext context) {
     return new Scaffold(
@@ -79,23 +100,20 @@ class BodyState extends State<Body> {
             fontWeight: FontWeight.bold 
           ),
         ),
-        actions: <Widget>[
-          new IconButton(
-            icon : new Icon(Icons.account_circle),
-            onPressed : () {
-            },
-            color: Colors.white,
-          ),
-        ],
+        // actions: <Widget>[
+        //   new IconButton(
+        //     icon : new Icon(Icons.account_circle),
+        //     onPressed : () {
+        //     },
+        //     color: Colors.white,
+        //   ),
+        // ],
       ),
       floatingActionButton: FloatingActionButton.extended(
         icon: Icon(Icons.add),
         label: Text("Add a Note"),
         onPressed: () {
-          Navigator.push(
-            context,
-            new MaterialPageRoute(builder: (context) => new NotePage(getSharedPrefs)),
-          );
+          gotoNote(new Note());
         }
       ),
       body: Container(
@@ -104,11 +122,10 @@ class BodyState extends State<Body> {
           itemCount: _noteKeys.length,
           itemBuilder: (BuildContext context, int idx) {
             bool last = _noteKeys.length == (idx + 1);
-            print(idx);
-            print(notes[idx]);
+            print(notes[idx]['created']);
+            Note note = new Note(notes[idx]['category'], notes[idx]['title'], notes[idx]['body'], notes[idx]['created']);
             return new Container(
-              child: new NoteCard(notes[idx]['title'], notes[idx]['body'], notes[idx]['category'], notes[idx]['created']),
-              // child: new NoteCard("Hello", "Raman", 2 , DateTime.now()),
+              child: new NoteCard(note, deleteNote, gotoNote),
               padding: last ? EdgeInsets.only(bottom:70.0) : EdgeInsets.only(bottom:10.0),
               );
           },
