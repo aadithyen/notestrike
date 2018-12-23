@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'noteclass.dart';
-import 'note.dart';
-import 'main.dart';
+import 'package:intl/intl.dart';
 
 // class NoteCard extends StatefulWidget {
 //   final _title, _body, _category, _created, _refreshCallBack;
@@ -60,12 +59,23 @@ class NoteCard extends StatelessWidget{
                     ),)
                 ),
                 new Container(
-                  child: new Text(_note.body,),
-                  padding: EdgeInsets.symmetric(horizontal : 20.0)
+                    child: Text(
+                        _note.body,
+                        maxLines: 4,
+                        overflow: TextOverflow.fade,
+                    ),
+                    padding: EdgeInsets.symmetric(horizontal : 20.0)
                 ),
                 new ButtonTheme.bar(
                   child: new ButtonBar(
                     children: <Widget>[
+                      new Text('Last updated : ' + DateFormat("d MMM y").format(DateTime.parse(_note.lastUpdate)),
+                        style: TextStyle(
+                          fontStyle: FontStyle.italic,
+                          color: Color(0xFF999999),
+                          fontSize: 11
+                        ),
+                      ),
                       new IconButton(
                         onPressed: () async {
                           return showDialog<Null>(

@@ -16,7 +16,6 @@ void main() => runApp(NoteStrike());
 // }
 
 
-
 class NoteStrike extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -62,7 +61,6 @@ class BodyState extends State<Body> {
   }
 
   Future<Null> getSharedPrefs() async {
-    print("Refreshing notes...");
     prefs = await SharedPreferences.getInstance();
     setState(() {
       _noteKeys = prefs.getKeys();
@@ -122,8 +120,7 @@ class BodyState extends State<Body> {
           itemCount: _noteKeys.length,
           itemBuilder: (BuildContext context, int idx) {
             bool last = _noteKeys.length == (idx + 1);
-            print(notes[idx]['created']);
-            Note note = new Note(notes[idx]['category'], notes[idx]['title'], notes[idx]['body'], notes[idx]['created']);
+            Note note = new Note(notes[idx]['category'], notes[idx]['title'], notes[idx]['body'], notes[idx]['created'], notes[idx]['lastUpdate']);
             return new Container(
               child: new NoteCard(note, deleteNote, gotoNote),
               padding: last ? EdgeInsets.only(bottom:70.0) : EdgeInsets.only(bottom:10.0),
