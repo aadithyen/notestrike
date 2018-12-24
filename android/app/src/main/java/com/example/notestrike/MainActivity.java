@@ -1,4 +1,4 @@
-package com.example.notestrike;
+package com.inspira.notestrike;
 
 import android.os.Bundle;
 import io.flutter.app.FlutterActivity;
