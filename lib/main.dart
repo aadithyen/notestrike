@@ -4,7 +4,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'note.dart';
 import 'noteclass.dart';
 import 'dart:convert';
-import 'package:splashscreen/splashscreen.dart';
 
 void main() => runApp(NoteStrike());
 
@@ -29,7 +28,7 @@ class NoteStrike extends StatelessWidget {
           );
         }
       },
-      title: "Note Strike",
+      title: "Notestrike",
       home: Body(),
       theme: ThemeData(
         fontFamily: 'Roboto',

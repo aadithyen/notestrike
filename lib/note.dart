@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'notecard.dart';
 import 'dart:convert';
 import 'noteclass.dart';
-import 'dart:async';
 import 'package:share/share.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
