@@ -7,14 +7,6 @@ import 'dart:convert';
 
 void main() => runApp(NoteStrike());
 
-// class noteStrike extends StatefulWidget {
-//   @override
-//     State<StatefulWidget> createState() {
-//       return new noteStrikeState();
-//     }
-// }
-
-
 class NoteStrike extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
